@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Shower Presentation Engine</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="node_modules/@shower/material/styles/styles.css">
+    <style>
+
+        .shower {
+            --slide-ratio: calc(16 / 9);
+        }
+
+	.slide {
+	    padding-top:30px;
+	}
+
+	.shower.full .slide pre mark:not(:only-child):not(.visited):not(.active).next {
+	    visibility: visible;
+	    background-color: transparent;
+	}
+
+	.shower.full .slide pre mark:not(:only-child).next {
+	    background-color: ;
+	}
+
+	.code_box {
+	    padding: 10px;
+	    border:1px solid black;
+	    border-radius: 10px;
+	    box-shadow: 2px 2px 5px rgb(70,70,70);
+	}
+
+	.code_file {
+	}
+	.cli {
+	}
+
+	.annotation_container {
+	    position:relative
+	}
+
+	.annotation {
+	    font-family: "Roboto", sans-serif;
+	    font-size: 24px/2;
+	    position:absolute;
+	}
+
+	.annotation.right {
+	    left: 20px;
+	}
+
+    </style>
+</head>
+<body class="shower list">
+
+    <header class="caption">
+      <h1>Modernizing Your Build System</h1>
+      <p>John Haiducek</p>
+    </header>
+
+    <section class="slide" id="titleslide">
+
+      <h2>Modernizing Your Build System</h2>
+      <h3>Or, how to not reinvent the wheel</h3>
+      <h3>John Haiducek</h3>
+      <h3>CEDAR 2021</h3>
+
+    </section>
+
+    <section class="slide">
+      <h2>Overview</h2>
+      <ul>
+	<li>What is a build system</li>
+	<li>What makes a good build system</li>
+	<li>Applying </li>
+      </ul>
+    </section>
+
+    <section class="slide">
+    </section>
+
+    <section class="slide">
+      <h2>Source to binary</h2>
+
+      <p>Simplest case, just run the compiler:</p>
+
+      <pre class="code_box cli">
+	<code>$ gfortran -o hello hello.f90
+$ ./hello
+Hello, world!</code>
+      </pre>
+
+      <p>But what if your program is complex and split into a lot of files? You'd have to run a command like this for each one!</p>
+
+    </section>
+
+    <section class="slide">
+      <h2>Makefiles to the rescue</h2>
+
+      <div class="columns two">
+	<div>
+	  Makefile:
+	  <pre class="code_box code_file">
+	    <code>FC=gfortran
+%.o: %.f90
+	$(FC) -c $&lt;
+hello: hello.o
+	$(FC) -o hello hello.o</code>
+	  </pre>
+	</div>
+
+	<div>
+	  Build and run:
+	  <pre class="code_box cli">
+	    <code>$ make
+gfortran -c hello.f90
+gfortran -o hello hello.o
+$ ./hello
+Hello, world!</code>
+	  </pre>
+	</div>
+      </div>
+
+    </section>
+
+    <section class="slide" id="not_portable">
+      <h2>Makefiles aren&rsquo;t portable</h2>
+
+	  <pre class="code_box code_file">
+	    <code><mark class="next">FC=gfortran</mark><span class="annotation_container"><span class="annotation right next">What if the system uses a different compiler?</span></span>
+%.o: %.f90
+	<mark class="next">$(FC) -c $&lt;</mark><span class="annotation_container"><span class="annotation right next">What if the compiler needs extra switches to work?</span></span>
+hello: hello.o
+	$(FC) -o hello hello.o</code>
+	  </pre>
+
+	  <p class="next">What if our program has external dependencies (that could be located anywhere on the system)?</p>
+
+    </section>
+
+    <section class="slide">
+      <h2>The non-scalable solution</h2>
+
+      <div class="columns two">
+	<div>
+	  Makefile:
+	  <pre class="code_box code_file">
+	    <code><mark>include Makefile.linux.gfortran</mark>
+%.o: %.f90
+	$(FC) -c $&lt;
+hello: hello.o
+	$(FC) -o hello hello.o</code>
+	  </pre>
+	</div>
+	<div>
+	  Makefile.linux.gfortran
+	  <pre class="code_box code_file">
+	    <code>FC=gfortran</code>
+	  </pre>
+	<ul>
+	  <li>Results in a proliferation of Makefile.(os).(compiler) files</li>
+	  <li>User must manually select the correct OS/compiler</li>
+	</ul>
+	</div>
+      </div>
+
+    </section>
+
+    <section class="slide">
+
+      <figure class="place">
+	<h2>These problems have already been solved</h2>
+	<blockquote>
+	  <p>Those who do not understand Autoconf are condemned to reinvent it, poorly.</p>
+	</blockquote>
+	<figcaption>Autoconf documentation</figcaption>
+      </figure>
+
+    </section>
+
+    <section class="slide">
+      <h2>What makes a good build system</h2>
+
+      <ul>
+	<li>Simple to use: 2-3 easy commands to build and install</li>
+	<li>Adapts to different compilers and operating systems</li>
+	<li>Automatically finds external dependencies (and allows the user to override their locations)</li>
+      </ul>
+
+      <figure class="place bottom" style="width:60%;">
+	<blockquote>
+	  <p>The primary goal ... is making the <em>user's</em> life easier; making the <em>maintainer's</em> life easier is only a secondary goal.</p>
+	</blockquote>
+	<figcaption>Autoconf documentation</figcaption>
+      </figure>
+
+    </section>
+
+    <section>
+      <h2>Build systems comparison</h2>
+
+      <table>
+      </table>
+    </section>
+
+    <div class="progress"></div>
+
+    <script src="node_modules/@shower/core/dist/shower.js"></script>
+    <!-- Copyright © 2021 Yours Truly, Famous Inc. -->
+
+</body>
+</html>
