@@ -279,6 +279,118 @@ $ make
 
     </section>
 
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      The problem: MPI standard includes 3 different Fortran interfaces
+      <ul>
+	<li>Legacy: <code>include 'mpif.h'</code></li>
+	<li>Fortran 90: <code>use mpi</code></li>
+	<li>Fortran 2008: <code>use mpi_f08</code></li>
+      </ul>
+
+      <p>Availability of these varies dependong on the MPI implementation, compiler, etc.</p>
+
+    </section>
+
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      <ul>
+	<li>Legacy: <code>include 'mpif.h'</code>
+	  <ul>
+	    <li>Deprecated&mdash;might not be available in the future</li>
+	    <li>Produces lots of type mismatch warnings on modern compilers</li>
+	    <li>But: This is the only option in some cases</li>
+	  </ul>
+	</li>
+      </ul>
+
+    </section>
+
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      <ul>
+	<li>Fortran 90: <code>use mpi</code>
+	  <ul>
+	    <li>Call signatures are the same as legacy interface, but doesn't trigger all the compiler warnings</li>
+	  </ul>
+	</li>
+	<li>Fortran 2008: <code>use mpi_f08</code>
+	  <ul>
+	    <li>Modernized interface, some call signatures are different (mostly just different data types for some arguments) <nobr>e.g. <code>INTEGER COMM</code> &rarr; <code>TYPE(MPI_Comm) comm</code></nobr></li>
+	  </ul>
+	</li>
+    </ul>
+
+    </section>
+
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      <div class="columns two">
+	<div>
+	  <ul>
+	    <li>Solution: Adaptable module to handle MPI import
+	      <ul>
+		<li>Preprocessor directives (set using CMake) determine which MPI interface is used</li>
+	      </ul>
+	  </ul>
+
+	</div>
+	<div>
+	  <pre class="code_box code_file">
+	  <code class="compact" style="font-size:0.9em;">#include "mpi_types.h"
+
+module system_mpi
+#ifdef HAVE_MPI_F08_MODULE
+  use mpi_f08
+#elif HAVE_MPI_F90_MODULE
+  use mpi
+#else
+  include 'mpif.h'
+#endif
+end module system_mpi</code>
+	  </pre>
+	</div>
+      </div>
+
+      <div class="place bottom" style="padding-bottom:4em">
+	<a href="https://github.com/lightda/system_mpi">https://github.com/lightda/system_mpi</a>
+      </div>
+
+    </section>
+
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      <pre class="code_box code_file">
+	<code class="compact" style="font-size:0.6em;">use system_mpi
+
+MPI_COMM_TYPE::comm
+MPI_REQUEST_TYPE::request
+MPI_STATUS_TYPE::status
+integer::ierr
+
+call MPI_Init(ierr)
+
+comm=MPI_COMM_WORLD
+
+call MPI_Ibcast( &
+   1,1,MPI_INTEGER,0,comm,request,ierr)
+
+call MPI_Wait(request,status,ierr)
+
+call MPI_Finalize(ierr)</code>
+      </pre>
+
+      <div class="place bottom" style="padding-bottom:4em">
+	<a href="https://github.com/lightda/system_mpi">https://github.com/lightda/system_mpi</a>
+      </div>
+
+    </section>
+
     <div class="progress"></div>
 
     <script src="node_modules/@shower/core/dist/shower.js"></script>
