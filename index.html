@@ -50,6 +50,15 @@
 	    left: 20px;
 	}
 
+	.output {
+	    color: rgb(150,150,200);
+	}
+
+	.slide pre code.compact {
+	    font-size:0.6em;
+	    line-height:1.1;
+	}
+
     </style>
 </head>
 <body class="shower list">
@@ -73,25 +82,50 @@
       <ul>
 	<li>What is a build system</li>
 	<li>What makes a good build system</li>
-	<li>Applying </li>
       </ul>
     </section>
 
     <section class="slide">
+
+      <figure class="place">
+	<blockquote>
+	  <p>Those who do not understand Autoconf are condemned to reinvent it, poorly.</p>
+	</blockquote>
+	<figcaption>Autoconf documentation</figcaption>
+      </figure>
+
     </section>
 
     <section class="slide">
-      <h2>Source to binary</h2>
 
-      <p>Simplest case, just run the compiler:</p>
+      <h2>Coping with software complexity</h2>
+
+      <div class="columns two">
+	<div>
+	  <figure>
+	    <img src="images/compiler.png" width="150px"/>
+	    <figcaption>Compilers convert a single source file to binary</figcaption>
+	  </figure>
+	</div>
+	<div>
+	  <figure>
+	    <img src="images/build_system.png" width="350px"/>
+	    <figcaption>Build systems process multiple source files and external libraries</figcaption>
+	  </figure>
+	</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Compiler alone can only handle the simplest case</h2>
 
       <pre class="code_box cli">
 	<code>$ gfortran -o hello hello.f90
 $ ./hello
-Hello, world!</code>
+<span class="output">Hello, world!</span></code>
       </pre>
 
-      <p>But what if your program is complex and split into a lot of files? You'd have to run a command like this for each one!</p>
+      <p>If your program is complex and split into a lot of files, you have to run a lot of commands like this one</p>
 
     </section>
 
@@ -114,10 +148,10 @@ hello: hello.o
 	  Build and run:
 	  <pre class="code_box cli">
 	    <code>$ make
-gfortran -c hello.f90
-gfortran -o hello hello.o
+<span class="output">gfortran -c hello.f90</span>
+<span class="output">gfortran -o hello hello.o</span>
 $ ./hello
-Hello, world!</code>
+<span class="output">Hello, world!</span></code>
 	  </pre>
 	</div>
       </div>
@@ -168,18 +202,6 @@ hello: hello.o
     </section>
 
     <section class="slide">
-
-      <figure class="place">
-	<h2>These problems have already been solved</h2>
-	<blockquote>
-	  <p>Those who do not understand Autoconf are condemned to reinvent it, poorly.</p>
-	</blockquote>
-	<figcaption>Autoconf documentation</figcaption>
-      </figure>
-
-    </section>
-
-    <section class="slide">
       <h2>What makes a good build system</h2>
 
       <ul>
@@ -197,11 +219,61 @@ hello: hello.o
 
     </section>
 
-    <section>
-      <h2>Build systems comparison</h2>
+    <section class="slide">
+      <h2>These problems have already been solved</h2>
 
       <table>
+	<thead>
+	  <th></th>
+	  <th>Compiler detection</th>
+	  <th>Dependency finding</th>
+	  <th>Platforms</th>
+	</thead>
+	<tbody>
+	  <tr><td>Make</td><td>n</td><td>n</td><td>Unix-like</td></tr>
+	  <tr><td>Autotools</td><td>y</td><td>y</td><td>Unix-like</td></tr>
+	  <tr><td>CMake</td><td>y</td><td>y</td><td>Multiple</td></tr>
+	</tbody>
       </table>
+    </section>
+
+    <section class="slide">
+      <h2>Building with CMake</h2>
+
+      CMakeLists.txt:
+      <pre class="code_box code_file">
+	<code>cmake_minimum_required(VERSION 3.0.2)
+project(hello Fortran)
+add_executable(hello hello.f90)</code>
+      </pre>
+    </section>
+
+    <section class="slide">
+      <h2>Building with CMake</h2>
+
+      Build and run
+      <pre class="code_box cli">
+	<code class="compact">$ cmake /path/to/source/code
+<span class="output compact">-- The Fortran compiler identification is GNU 11.1.0
+-- Checking whether Fortran compiler has -isysroot
+-- Checking whether Fortran compiler has -isysroot - yes
+-- Checking whether Fortran compiler supports OSX deployment target flag
+-- Checking whether Fortran compiler supports OSX deployment target flag - yes
+-- Detecting Fortran compiler ABI info
+-- Detecting Fortran compiler ABI info - done
+-- Check for working Fortran compiler: /usr/local/bin/gfortran - skipped
+-- Checking whether /usr/local/bin/gfortran supports Fortran 90
+-- Checking whether /usr/local/bin/gfortran supports Fortran 90 - yes
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /build/dir/path</span>
+$ make
+<span class="output compact">Scanning dependencies of target hello
+[ 50%] Building Fortran object CMakeFiles/hello.dir/hello.f90.o
+[100%] Linking Fortran executable hello
+[100%] Built target hello</span></code>
+      </pre>
+
     </section>
 
     <div class="progress"></div>
