@@ -368,19 +368,20 @@ end module system_mpi</code>
       <h2>MPI interfaces</h2>
 
       <pre class="code_box code_file">
-	<code class="compact" style="font-size:0.6em;">use system_mpi
+	<code class="compact" style="font-size:0.6em;"><mark class="next">#include "mpi_types.h"
+use system_mpi</mark><span class="annotation_container"><span class="annotation right next">Provides the best available of the three Fortran interfaces</span></span>
 
-MPI_COMM_TYPE::comm
+<mark class="next">MPI_COMM_TYPE::comm
 MPI_REQUEST_TYPE::request
-MPI_STATUS_TYPE::status
+MPI_STATUS_TYPE::status</mark><span class="annotation_container"><span class="annotation right next">Preprocessor converts directives to the correct type for the chosen interface</span></span>
 integer::ierr
 
 call MPI_Init(ierr)
 
 comm=MPI_COMM_WORLD
 
-call MPI_Ibcast( &
-   1,1,MPI_INTEGER,0,comm,request,ierr)
+<mark class="next">call MPI_Ibcast( &
+   1,1,MPI_INTEGER,0,comm,request,ierr)</mark><span class="annotation_container"><span class="annotation right next">MPI procedures are called as normal</span></span>
 
 call MPI_Wait(request,status,ierr)
 
