@@ -685,14 +685,14 @@ add_custom_command(
 
       Set the compiler image with an ARG:
       <pre class="code_box code_file">
-	<code>ARG compiler_image=gcc:latest
+	<code><mark>ARG compiler_image=gcc:latest</mark>
 FROM $compiler_image AS build_base</code>
       </pre>
 
       Build an image with a particular compiler
       <pre class="code_box cli">
 	<code>docker build -t lightda-examples-gcc:4.9.4 \
-  --build-arg compiler_image=gcc:4.9.4 compiler-tests</code>
+  <mark>--build-arg compiler_image=gcc:4.9.4</mark> compiler-tests</code>
       </pre>
 
       Environment variables (e.g. FC, FFLAGS) can be set similarly
