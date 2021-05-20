@@ -610,6 +610,18 @@ end subroutine analyze</code>
     </section>
 
     <section class="slide">
+      <h2>Polymorphism limitations</h2>
+
+      Polymorphic arguments cannot be passed to C interoperable procedures. This means that you:
+      <ul>
+	<li>Can't pass polymorphic types to C</li>
+	<li>Can't create a function that receives a polymorphic type from C</li>
+      </ul>
+
+      C interoperable procedures are required to interface with other languages such as Python, so the above also applies to those languages.
+    </section>
+
+    <section class="slide">
       <h2>Handling external dependencies</h2>
 
       Some projects package everything together (perhaps using git submodule), but this can cause problems
