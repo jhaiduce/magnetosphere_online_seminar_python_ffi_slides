@@ -566,6 +566,49 @@ catch() {
 
     </section>
 
+    <section class="slide">
+      <h2>Exceptions in Fortran</h2>
+
+	  Use a polymorphic exception type:
+
+      <div class="columns two">
+	<div>
+
+	  <pre class="code_box code_file">
+	    <code class="compact" style="font-size:0.75em">subroutine analyze(status)
+
+  type(error_container), &
+    intent(out), optional::status
+
+  call get_data(status)
+
+  select type(error => status%info)
+  class is(io_error)
+
+    ! Handle the exception
+    error%handled = .true.
+
+  end select
+
+end subroutine analyze</code>
+	  </pre>
+
+	</div>
+	<div>
+
+	  <div style="font-size:0.75em">Poppe 2012 &ldquo;Error handling in Fortran 2003&rdquo; 10.1145/2338786.2338787</div>
+
+	  <div style="font-size:0.75em">
+	    <div><nobr><a href="https://github.com/koenpoppe/ErrorHandlingInFortran2003">https://github.com/koenpoppe/ErrorHandlingInFortran2003</a></nobr></div>
+
+	    <div><nobr><a href="https://github.com/lightda/fortran_exceptions">https://github.com/lightda/fortran_exceptions</a></nobr></div>
+	  </div>
+
+	</div>
+      </div>
+
+    </section>
+
     <div class="progress"></div>
 
     <script src="node_modules/@shower/core/dist/shower.js"></script>
