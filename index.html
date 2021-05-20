@@ -394,6 +394,83 @@ call MPI_Finalize(ierr)</code>
 
     </section>
 
+    <section class="slide">
+      <h2>Error handling: Integer error codes</h2>
+
+      <div class="columns two">
+
+	<div>
+	  Fortran:
+	  <pre class="code_box code_file">
+	    <code>call MPI_Init(ierr)</code>
+	  </pre>
+
+	  C:
+	  <pre class="code_box code_file">
+	    <code>int ierr=mkdir("build",0777)</code>
+	  </pre>
+	</div>
+	<div>
+	  <ul>
+	    <li>Pros
+	      <ul>
+		<li>Portable</li>
+		<li>Simple</li>
+	      </ul>
+	    </li>
+	    <li>Cons
+	      <ul>
+		<li>Caller must check code</li>
+		<li>Integer values can be misinterpreted</li>
+	      </ul>
+	    </li>
+	</div>
+      </div>
+
+    </section>
+
+    <section class="slide">
+      <h2>Error handling: Exceptions</h2>
+
+      <div class="columns two">
+
+	<div>
+	  Python:
+	  <pre class="code_box code_file">
+	    <code class="compact" style="font-size:0.8em">try:
+    raise ValueError(
+        "An error occurred")
+except:
+    try_to_recover()</code>
+	  </pre>
+
+	  C++:
+	  <pre class="code_box code_file">
+	    <code class="compact" style="font-size:0.8em">try{
+  throw exception;
+catch() {
+  try_to_recover()
+}</code>
+	  </pre>
+	</div>
+	<div>
+	  <ul>
+	    <li>Pros
+	      <ul>
+		<li>Less ambiguity in meaning</li>
+		<li>Program stops on unhandled exception</li>
+	      </ul>
+	    </li>
+	    <li>Cons
+	      <ul>
+		<li>Less portable (e.g. only C++ code can catch C++ exceptions)</li>
+	      </ul>
+	    </li>
+	</div>
+      </div>
+
+    </section>
+
     <div class="progress"></div>
 
     <script src="node_modules/@shower/core/dist/shower.js"></script>
