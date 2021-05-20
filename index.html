@@ -686,7 +686,7 @@ add_custom_command(
       Set the compiler image with an ARG:
       <pre class="code_box code_file">
 	<code><mark>ARG compiler_image=gcc:latest</mark>
-FROM $compiler_image AS build_base</code>
+FROM <mark>$compiler_image</mark> AS build_base</code>
       </pre>
 
       Build an image with a particular compiler
@@ -697,7 +697,6 @@ FROM $compiler_image AS build_base</code>
 
       Environment variables (e.g. FC, FFLAGS) can be set similarly
 
-      </div>
     </section>
 
     <div class="progress"></div>
