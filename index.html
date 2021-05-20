@@ -609,6 +609,51 @@ end subroutine analyze</code>
 
     </section>
 
+    <section class="slide">
+      <h2>Testing with CTest</h2>
+
+      CMake provides its own testing infrastructure:
+      <pre class="code_box code_file">
+	<code class="compact">enable_testing()
+
+# Create a test (passes if test1_bin has an exit status of 0)
+add_executable(test1_bin test1.f90)
+add_test(test1 test1_bin)
+
+add_custom_target(all_tests ALL
+  DEPENDS test1)
+
+# Run tests automatically after build
+add_custom_command(
+     TARGET all_tests
+     COMMENT "Run tests"
+     POST_BUILD
+     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+     COMMAND ${CMAKE_CTEST_COMMAND}</code>
+      </pre>
+
+    </section>
+
+    <section class="slide">
+      <h2>Docker enables testing of many compilers</h2>
+
+      Set the compiler image with an ARG:
+      <pre class="code_box code_file">
+	<code>ARG compiler_image=gcc:latest
+FROM $compiler_image AS build_base</code>
+      </pre>
+
+      Build an image with a particular compiler
+      <pre class="code_box cli">
+	<code>docker build -t lightda-examples-gcc:4.9.4 \
+  --build-arg compiler_image=gcc:4.9.4 compiler-tests</code>
+      </pre>
+
+      Environment variables (e.g. FC, FFLAGS) can be set similarly
+
+      </div>
+    </section>
+
     <div class="progress"></div>
 
     <script src="node_modules/@shower/core/dist/shower.js"></script>
