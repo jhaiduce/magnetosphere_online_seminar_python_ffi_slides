@@ -395,6 +395,96 @@ call MPI_Finalize(ierr)</code>
     </section>
 
     <section class="slide">
+      <h2>Polymorphic types</h2>
+
+      <div class="columns two">
+	<div>
+	  Base observation type:
+	  <pre class="code_box code_file">
+	    <code class="compact">module observations
+
+  implicit none
+
+  type, abstract::observation_set
+  contains
+    procedure(get_size), deferred::get_size
+    procedure(get_values), deferred::get_values
+    procedure(get_values), deferred::get_errors
+  end type observation_set
+
+  abstract interface
+
+     ! Procedure signatures go here !
+
+  end interface
+
+end module observations</code>
+	  </pre>
+	</div>
+	<div>
+
+	  Derived type for vertical TEC:
+	  <pre class="code_box code_file">
+	    <code class="compact">module vtec_observations
+
+  use observations, ONLY: observation_set
+
+  implicit none
+
+  type, abstract, extends(observation_set):: &
+      vtec_observation_set
+  contains
+    procedure::get_size
+    procedure::get_values
+    procedure::get_errors
+  end type vtec_observation_set
+
+  abstract interface
+
+     ! Procedure implementations go here !
+
+  end interface
+
+end module vtec_observations</code>
+	  </pre>
+
+	</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <h2>Polymorphic types</h2>
+
+      Using vtec_observations type:
+      <pre class="code_box code_file">
+	<code class="compact">subroutine process_obs(obs_set)
+  use observations, ONLY: observation_set
+  use vtec_observations, ONLY: vtec_observation_set
+
+  class(observation_set)::obs_set
+  integer::size
+
+  size = obs_set%get_size()
+
+  ! Select type lets us act conditionally depending on
+  ! the type of a polymorphic variable
+  select type(obs_set)
+  class is (vtec_observation_set)
+
+    ! Do something specific with the TEC data
+
+  class default
+
+    ! Do something generic
+
+  end select
+
+end subroutine process_obs</code>
+      </pre>
+
+    </section>
+
+    <section class="slide">
       <h2>Error handling: Integer error codes</h2>
 
       <div class="columns two">
