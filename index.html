@@ -642,39 +642,6 @@ end subroutine analyze</code>
     </section>
 
     <section class="slide">
-      <h2>Breaking into components</h2>
-
-      CMake &ldquo;superbuild&rdquo; using ExternalProject:
-
-      <pre class="code_box code_file">
-	<code class="compact" style="font-size:0.6em">include(ExternalProject)
-
-ExternalProject_Add(
-  system_mpi
-  GIT_REPOSITORY https://github.com/lightda/system_mpi
-  GIT_TAG main
-  CMAKE_CACHE_ARGS
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR})
-
-ExternalProject_Add(
-  fortran_exceptions
-  GIT_REPOSITORY https://github.com/lightda/fortran_exceptions
-  GIT_TAG main
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR})
-
-ExternalProject_Add(lightda
-  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.."
-  CMAKE_CACHE_ARGS
-    -Dsystem_mpi_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/system_mpi
-    -Dfortran_exceptions_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/fortran_exceptions
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS system_mpi fortran_exceptions)</code>
-      </pre>
-
-    </section>
-
-    <section class="slide">
       <h2>Testing with CTest</h2>
 
       CMake provides its own testing infrastructure:
@@ -715,6 +682,39 @@ FROM <mark>$compiler_image</mark> AS build_base</code>
       </pre>
 
       Environment variables (e.g. FC, FFLAGS) can be set similarly
+
+    </section>
+
+    <section class="slide">
+      <h2>Breaking into components</h2>
+
+      CMake &ldquo;superbuild&rdquo; using ExternalProject:
+
+      <pre class="code_box code_file">
+	<code class="compact" style="font-size:0.6em">include(ExternalProject)
+
+ExternalProject_Add(
+  system_mpi
+  GIT_REPOSITORY https://github.com/lightda/system_mpi
+  GIT_TAG main
+  CMAKE_CACHE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR})
+
+ExternalProject_Add(
+  fortran_exceptions
+  GIT_REPOSITORY https://github.com/lightda/fortran_exceptions
+  GIT_TAG main
+  CMAKE_CACHE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR})
+
+ExternalProject_Add(lightda
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.."
+  CMAKE_CACHE_ARGS
+    -Dsystem_mpi_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/system_mpi
+    -Dfortran_exceptions_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/fortran_exceptions
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS system_mpi fortran_exceptions)</code>
+      </pre>
 
     </section>
 
