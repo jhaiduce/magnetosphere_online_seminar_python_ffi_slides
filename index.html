@@ -612,13 +612,20 @@ end subroutine analyze</code>
     <section class="slide">
       <h2>Polymorphism limitations</h2>
 
-      Polymorphic arguments cannot be passed to C interoperable procedures. This means that you:
+
       <ul>
-	<li>Can't pass polymorphic types to C</li>
-	<li>Can't create a function that receives a polymorphic type from C</li>
+	<li>Can't pass to/from C interoperable procedures
+	  <ul>
+	    <li>This prevents passing to other languages such as Python</li>
+	  </ul>
+	</li>
+	<li>Compilers can differ slightly in implementation of polymorphism
+	  <ul>
+	    <li>This can be mitigated with testing</li>
+	  </ul>
+	</li>
       </ul>
 
-      C interoperable procedures are required to interface with other languages such as Python, so the above also applies to those languages.
     </section>
 
     <section class="slide">
