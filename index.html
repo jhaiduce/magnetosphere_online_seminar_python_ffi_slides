@@ -233,34 +233,6 @@ hello: hello.o
     </section>
 
     <section class="slide">
-      <h2>The non-scalable solution</h2>
-
-      <div class="columns two">
-	<div>
-	  Makefile:
-	  <pre class="code_box code_file">
-	    <mark class="next"><code class="language-makefile">include Makefile.linux.gfortran</code></mark>
-<code class="language-makefile">%.o: %.f90
-	$(FC) -c $&lt;
-hello: hello.o
-	$(FC) -o hello hello.o</code>
-	  </pre>
-	</div>
-	<div>
-	  Makefile.linux.gfortran
-	  <pre class="code_box code_file">
-	    <code class="language-makefile">FC=gfortran</code>
-	  </pre>
-	<ul>
-	  <li>Results in a proliferation of files named <code>Makefile.(os).(compiler)</code></li>
-	  <li>User must manually select the correct OS/compiler</li>
-	</ul>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
 
       <figure class="place">
 	<blockquote>
@@ -495,6 +467,34 @@ FROM <mark>$compiler_image</mark> AS build_base</code>
 	<li>As a community, we should look to the computer science world for examples of how to write and package software effectively.</li>
 	<li>Try not to reinvent the wheel.</li>
       </ul>
+    </section>
+
+    <section class="slide">
+      <h2>The non-scalable solution</h2>
+
+      <div class="columns two">
+	<div>
+	  Makefile:
+	  <pre class="code_box code_file">
+	    <mark class="next"><code class="language-makefile">include Makefile.linux.gfortran</code></mark>
+<code class="language-makefile">%.o: %.f90
+	$(FC) -c $&lt;
+hello: hello.o
+	$(FC) -o hello hello.o</code>
+	  </pre>
+	</div>
+	<div>
+	  Makefile.linux.gfortran
+	  <pre class="code_box code_file">
+	    <code class="language-makefile">FC=gfortran</code>
+	  </pre>
+	<ul>
+	  <li>Results in a proliferation of files named <code>Makefile.(os).(compiler)</code></li>
+	  <li>User must manually select the correct OS/compiler</li>
+	</ul>
+	</div>
+      </div>
+
     </section>
 
     <section class="slide">
