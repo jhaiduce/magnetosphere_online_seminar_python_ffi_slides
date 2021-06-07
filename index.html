@@ -355,37 +355,6 @@ target_link_libraries(really_cool_simulation &lt;PackageName&gt;)</code>
     </section>
 
     <section class="slide">
-      <h2>Handling external dependencies</h2>
-
-      <div style="padding-top:40px;">
-      <p>What happens when you call <code class="language-cmake">find_package(&lt;PackageName&gt;)</code>?</p>
-
-      <div class="columns two" style="font-size:0.9em;">
-	<div>
-	  <ol>
-	    <li>Module mode:
-	      <ul>
-		<li>CMake looks for <code>Find&lt;PackageName&gt;.cmake</code></li>
-		<li>CMake provides these &ldquo;find modules&rdquo; for many common libraries, or you can provide your own</li>
-	      </ul>
-	    </li>
-	  </ol>
-	</div>
-	<div>
-	  <ol>
-	    <li value="2">Config mode:
-	      <ul>
-		<li>CMake searches for <code>&lt;PackageName&gt;Config.cmake&rdquo;</code></li>
-		<li>You can tell CMake where to look by setting <code>&lt;PackageName&gt;_DIR</code></li>
-	      </ul>
-	    </li>
-	  </ol>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
       <h2>External dependencies: MPI</h2>
 
       <pre class="code_box code_file">
@@ -572,6 +541,37 @@ FROM <mark>$compiler_image</mark> AS build_base</code>
 	<li>As a community, we should look to the computer science world for examples of how to write and package software effectively.</li>
 	<li>Try not to reinvent the wheel.</li>
       </ul>
+    </section>
+
+    <section class="slide">
+      <h2>Handling external dependencies</h2>
+
+      <div style="padding-top:40px;">
+      <p>What happens when you call <code class="language-cmake">find_package(&lt;PackageName&gt;)</code>?</p>
+
+      <div class="columns two" style="font-size:0.9em;">
+	<div>
+	  <ol>
+	    <li>Module mode:
+	      <ul>
+		<li>CMake looks for <code>Find&lt;PackageName&gt;.cmake</code></li>
+		<li>CMake provides these &ldquo;find modules&rdquo; for many common libraries, or you can provide your own</li>
+	      </ul>
+	    </li>
+	  </ol>
+	</div>
+	<div>
+	  <ol>
+	    <li value="2">Config mode:
+	      <ul>
+		<li>CMake searches for <code>&lt;PackageName&gt;Config.cmake&rdquo;</code></li>
+		<li>You can tell CMake where to look by setting <code>&lt;PackageName&gt;_DIR</code></li>
+	      </ul>
+	    </li>
+	  </ol>
+	</div>
+      </div>
+
     </section>
 
     <section class="slide">
