@@ -363,39 +363,6 @@ target_link_libraries(really_cool_simulation MPI::MPI_Fortran)</code>
     <section class="slide">
       <h2>MPI interfaces</h2>
 
-      <ul>
-	<li>Legacy: <code>include 'mpif.h'</code>
-	  <ul>
-	    <li>Deprecated&mdash;might not be available in the future</li>
-	    <li>Produces lots of type mismatch warnings on modern compilers</li>
-	    <li>But: This is the only option in some cases</li>
-	  </ul>
-	</li>
-      </ul>
-
-    </section>
-
-    <section class="slide">
-      <h2>MPI interfaces</h2>
-
-      <ul>
-	<li>Fortran 90: <code>use mpi</code>
-	  <ul>
-	    <li>Call signatures are the same as legacy interface, but doesn't trigger all the compiler warnings</li>
-	  </ul>
-	</li>
-	<li>Fortran 2008: <code>use mpi_f08</code>
-	  <ul>
-	    <li>Modernized interface, some call signatures are different (mostly just different data types for some arguments) <nobr>e.g. <code>INTEGER COMM</code> &rarr; <code>TYPE(MPI_Comm) comm</code></nobr></li>
-	  </ul>
-	</li>
-    </ul>
-
-    </section>
-
-    <section class="slide">
-      <h2>MPI interfaces</h2>
-
       <div class="columns two">
 	<div>
 	  <ul>
@@ -528,6 +495,39 @@ FROM <mark>$compiler_image</mark> AS build_base</code>
 	<li>As a community, we should look to the computer science world for examples of how to write and package software effectively.</li>
 	<li>Try not to reinvent the wheel.</li>
       </ul>
+    </section>
+
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      <ul>
+	<li>Legacy: <code>include 'mpif.h'</code>
+	  <ul>
+	    <li>Deprecated&mdash;might not be available in the future</li>
+	    <li>Produces lots of type mismatch warnings on modern compilers</li>
+	    <li>But: This is the only option in some cases</li>
+	  </ul>
+	</li>
+      </ul>
+
+    </section>
+
+    <section class="slide">
+      <h2>MPI interfaces</h2>
+
+      <ul>
+	<li>Fortran 90: <code>use mpi</code>
+	  <ul>
+	    <li>Call signatures are the same as legacy interface, but doesn't trigger all the compiler warnings</li>
+	  </ul>
+	</li>
+	<li>Fortran 2008: <code>use mpi_f08</code>
+	  <ul>
+	    <li>Modernized interface, some call signatures are different (mostly just different data types for some arguments) <nobr>e.g. <code>INTEGER COMM</code> &rarr; <code>TYPE(MPI_Comm) comm</code></nobr></li>
+	  </ul>
+	</li>
+    </ul>
+
     </section>
 
     <section class="slide">
