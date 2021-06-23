@@ -156,20 +156,25 @@
 
       <h2 style="font-size:45px">Compiler converts, build system coordinates</h2>
 
-      <div class="columns two">
-	<div>
-	  <figure>
-	    <img src="images/compiler.png" width="145px"/>
+	  <figure id="compiler_figure" class="next active">
+	    <img src="images/compiler.png" width="140px"/>
 	    <figcaption>Compilers convert a single source file to binary</figcaption>
 	  </figure>
-	</div>
-	<div>
-	  <figure>
+
+	  <figure id="build_system_figure" class="next">
 	    <img src="images/build_system.png" width="350px"/>
 	    <figcaption>Build systems process multiple source files and external libraries</figcaption>
 	  </figure>
-	</div>
-      </div>
+
+	  <style>
+	    #compiler_figure{width:400px}
+	    #compiler_figure.active{position:absolute; top:100px; left:300px;}
+	    #compiler_figure img{position:relative; left:180px}
+	    #compiler_figure.visited{position:absolute; top:100px; left:30px; transition: all 0.2s ease}
+
+	    #build_system_figure{position:absolute; top:100px; left:480px;}
+	  </style>
+
     </section>
 
     <section class="slide">
