@@ -104,15 +104,15 @@
 <body class="shower list">
 
     <header class="caption">
-      <h1>Developing for Portability</h1>
+      <h1>Interfacing Python with other languages</h1>
       <p>John Haiducek</p>
     </header>
 
     <section class="slide" id="titleslide">
 
-      <h2>Developing for Portability</h2>
+      <h2>Interfacing Python with other languages</h2>
       <h3>John Haiducek</h3>
-      <h3>CEDAR 2021</h3>
+      <h3>Magnetosphere Online Seminar Series</h3>
 
     <div class="distrostatement">DISTRIBUTION A: Approved for public release, distribution is unlimited</div>
 
@@ -121,726 +121,293 @@
     <section class="slide">
       <h2>Overview</h2>
       <ul>
-	<li>Why you should write portable software</li>
-	<li>Build systems</li>
-	<li>External dependencies</li>
-	<li>Testing</li>
+	<li>Scope of this talk</li>
+	<li>How languages talk to each other</li>
+	<li>Python C API</li>
+	<li>F2PY</li>
+	<li>CFFI</li>
       </ul>
     </section>
 
     <section class="slide">
-      <h2>Why you should write portable software</h2>
+      <h2>Scope of this talk</h2>
+
       <div class="columns two">
 	<div>
-	  <b>Portability supports reproducibility</b>
-
+	  <h3>Covered in this talk</h3>
 	  <ul>
-	    <li>Those attempting to reproduce your work might have to use a different compiler or operating system</li>
-	    <li>The specific hardware and software you used might not even exist in a few years</li>
+	    <li>How to create Python interfaces for C and Fortran code</li>
 	  </ul>
-
 	</div>
 	<div>
-	  <b>Portability enhances reusability</b>
+	  <h3>Related topics not discussed here</h3>
 	  <ul>
-	    <li>Supporting more environments means more people can benefit from your work</li>
+	    <li>How to write C and Fortran</li>
 	  </ul>
+	</div>
+      </div>
 
-	  <img src="images/os_recycling.svg" width="325px" style="display:block; margin:auto"/>
+    </section>
 
+    <section class="slide">
+
+      <h2>Why not just write everything in Python?</h2>
+
+      <div class="columns two">
+	<div>
+	  <h3>Increase performance</h3>
+	  <ul>
+	    <li>Pure python code tends to be ~100x slower than compiled languages like C or Fortran</li>
+	    <li>Popular libraries like scipy and numpy achieve high performance partly by implementing things in C/Fortran</li>
+	  </ul>
+	</div>
+	<div>
+	<h3>Interface with other software</h3>
+	<ul>
+	  <li>Interface with the OS</li>
+	  <li>Create a GUI (e.g. QT, GTK, TK)</li>
+	  <li>Use a library to support a specific file format (e.g. HDF5, netCDF)</li>
+	  <li>Read/write to a database (e.g. sqlite, mariadb)</li>
+	  <li>Provide a Python interface to an application (e.g. Blender, Paraview)</li>
+	  </ul>
+	</div>
+      </div>
+
+    </section>
+
+    <section class="slide">
+      <h2>How languages talk to each other</h2>
+      <div class="columns two">
+	<div>
+	  <b>Connecting codes at runtime requires a common application binary interface (ABI)</b>
+	  <ul>
+	    <li>Defines how function calls are represented in machine code</li>
+	    <li>Defines fundamental data types</li>
+	  </ul>
+	</div>
+	<div>
+	  <b>C is the only language with a standard ABI</b>
+	  <ul>
+	    <li>As a result, C has become the lingua franca for interfaces between languages.</li>
+	    <li>This doesn't mean that you have to write your code in C...but it does mean that function interfaces to other languages <i>must adhere to the C ABI</i>.</li>
+	  </ul>
+	  
 	</div>
       </div>
     </section>
 
     <section class="slide">
+      <h2>How languages talk to each other&mdash;C++</h2>
 
-      <h2 style="font-size:45px">Compiler converts, build system coordinates</h2>
+      To interface to the C function <pre><code class="language-c">int myfunction(int i, int *j);</code></pre>
 
-	  <figure id="compiler_figure" class="next">
-	    <img src="images/compiler.png" width="140px"/>
-	    <figcaption>Compiler converts a single source file to binary</figcaption>
-	  </figure>
-
-	  <figure id="build_system_figure" class="next">
-	    <img src="images/build_system.png" width="350px"/>
-	    <figcaption>Build system processes multiple source files and external libraries</figcaption>
-	  </figure>
-
-	  <style>
-	    #compiler_figure{width:400px}
-	    #compiler_figure.active{position:absolute; top:100px; left:300px;}
-	    #compiler_figure img{position:relative; left:145px}
-	    #compiler_figure.visited{position:absolute; top:100px; left:30px; transition: all 0.2s ease}
-
-	    #build_system_figure{position:absolute; top:100px; left:480px;}
-	  </style>
+      <pre class="code_box code_file">
+	<code class="language-c++">extern "C" {<br/>
+  int myfunction(int i, int *j*);<br/>
+}</code>
+      </pre>
+      <ul>
+	<li><code class="language-c++">extern "C"</code> turns off name mangling</li>
+	<li>Additional wrappers required to
+	  <ul>
+	    <li>pass C++ classes to C functions</li>
+	    <li>call class member functions from C</li>
+	  </ul>
+      </ul>
 
     </section>
 
     <section class="slide">
-      <h2>What makes a good build system</h2>
+      <h2>How languages talk to each other&mdash;Fortran</h2>
+
+      To interface to the C function <pre><code class="language-c">int myfunction(int i, int *j);</code></pre>
+
+      <pre class="code_box code_file">
+	<code class="language-fortran">integer(c_int) function myfunction(i, j) bind(c)<br/>
+  use iso_c_binding, only: c_int<br/>
+  integer(c_int), value::i<br/>
+  integer(c_int)::j<br/>
+end function</code>
+      </pre>
 
       <ul>
-	<li>Simple to use: 2-3 easy commands to build and install</li>
-	<li>Adapts to different compilers and operating systems</li>
-	<li>Automatically finds external dependencies (and allows the user to override their locations)</li>
+	<li><code class="language-fortran">bind(c)</code> turns off name mangling</li>
+	<li>Argument types limited to those in the intrinsic iso_c_binding module</li>
       </ul>
 
-      <figure class="place bottom" style="width:60%; bottom:20px;">
-	<blockquote>
-	  <p>The primary goal ... is making the <em>user's</em> life easier; making the <em>maintainer's</em> life easier is only a secondary goal.</p>
-	</blockquote>
-	<figcaption>Autoconf documentation</figcaption>
-      </figure>
-
     </section>
 
     <section class="slide">
-      <h2>Building with a Makefile</h2>
+      <h2>How languages talk to each other&mdash;Interpreted languages</h2>
 
-      <div class="columns two">
-	<div>
-	  Makefile:
-	  <pre class="code_box code_file">
-	    <code class="language-makefile">FC=gfortran
-%.o: %.f90
-	$(FC) -c $&lt;
-hello: hello.o
-	$(FC) -o hello hello.o</code>
-	  </pre>
-	</div>
+      Interpreted languages access the C ABI by either
 
-	<div>
-	  Build and run:
-	  <pre class="code_box cli">
-	    <code class="language-bash">$ make</code><code class="language-bash next">
-gfortran -c hello.f90
-gfortran -o hello hello.o</code><code class="language-bash next">
-$ ./hello</code><code class="language-bash next">
-Hello, world!</code>
-	  </pre>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide" id="not_portable">
-      <h2>Makefiles aren&rsquo;t portable</h2>
-
-      <pre class="code_box code_file" style="width:400px;">
-	<mark class="next"><code class="language-makefile">FC=gfortran</code></mark><span class="annotation_container"><span class="annotation right next">What if the system uses a different compiler?</span></span><code class="language-makefile">
-%.o: %.f90
-</code><mark class="next"><code class="language-makefile">    $(FC) -c $&lt;</code></mark><span class="annotation_container"><span class="annotation right next">What if the compiler needs extra switches to work?</span></span><code class="language-makefile">
-hello: hello.o
-	$(FC) -o hello hello.o</code>
-	  </pre>
-
-	  <p class="next">What if our program has external dependencies (that could be located anywhere on the system)?</p>
-
-    </section>
-
-    <section class="slide">
-      <h2>These problems have already been solved</h2>
-
-      <figure class="place">
-	<blockquote>
-	  <p>Those who do not understand Autoconf are condemned to reinvent it, poorly.</p>
-	</blockquote>
-	<figcaption>Autoconf documentation</figcaption>
-      </figure>
-
-    </section>
-
-    <section class="slide">
-      <h2>These problems have already been solved</h2>
-
-      <table style="margin-top:80px;">
-	<thead>
-	  <tr>
-	    <th></th>
-	    <th>Compiler detection</th>
-	    <th>Dependency finding</th>
-	    <th>Platforms</th>
-	  </tr>
-	</thead>
-	<tbody>
-	  <tr><td>Make</td><td>n</td><td>n</td><td>Unix-like</td></tr>
-	  <tr><td>Autotools</td><td>y</td><td>y</td><td>Unix-like</td></tr>
-	  <tr><td>CMake</td><td>y</td><td>y</td><td>Multiple</td></tr>
-	</tbody>
-      </table>
-    </section>
-
-    <section class="slide">
-      <h2>Building with CMake</h2>
-
-      CMakeLists.txt:
-      <pre class="code_box code_file">
-	<code class="language-cmake">cmake_minimum_required(VERSION 3.0.2)
-project(hello Fortran)
-add_executable(hello hello.f90)</code>
-      </pre>
-    </section>
-
-    <section class="slide">
-      <h2>Building with CMake</h2>
-
-      Build and run
-      <pre class="code_box cli" style="font-size:0.75em; line-height:1.0">
-	<code class="compact language-cmake" >$ cmake /path/to/source/code</code><code class="compact language-cmake next">
--- The Fortran compiler identification is GNU 11.1.0
--- Checking whether Fortran compiler has -isysroot
--- Checking whether Fortran compiler has -isysroot - yes
--- Checking whether Fortran compiler supports OSX deployment target flag
--- Checking whether Fortran compiler supports OSX deployment target flag - yes
--- Detecting Fortran compiler ABI info
--- Detecting Fortran compiler ABI info - done
--- Check for working Fortran compiler: /usr/local/bin/gfortran - skipped
--- Checking whether /usr/local/bin/gfortran supports Fortran 90
--- Checking whether /usr/local/bin/gfortran supports Fortran 90 - yes
--- Configuring done
--- Generating done
--- Build files have been written to: /build/dir/path</code><code class="compact language-cmake next">
-$ make</code><code class="compact language-cmake next">
-Scanning dependencies of target hello
-[ 50%] Building Fortran object CMakeFiles/hello.dir/hello.f90.o
-[100%] Linking Fortran executable hello
-[100%] Built target hello</code>
-      </pre>
-
-    </section>
-
-    <section class="slide">
-      <h2>Handling external dependencies</h2>
-
-      <pre class="code_box code_file place">
-	<code class="language-cmake" style="font-size:0.95em">find_package(&lt;PackageName&gt; REQUIRED)
-add_executable(really_cool_simulation really_cool_simulation.f90)
-target_link_libraries(really_cool_simulation &lt;PackageName&gt;)</code>
-      </pre>
-
-    </section>
-
-    <section class="slide">
-      <h2>External dependencies: MPI</h2>
-
-      <pre class="code_box code_file">
-	<code class="language-cmake" style="font-size:0.95em">find_package(MPI REQUIRED)
-target_link_libraries(really_cool_simulation MPI::MPI_Fortran)</code>
-      </pre>
-
-      But: MPI standard includes 3 different Fortran interfaces
       <ul>
-	<li>Legacy: <code>include 'mpif.h'</code></li>
-	<li>Fortran 90: <code>use mpi</code></li>
-	<li>Fortran 2008: <code>use mpi_f08</code></li>
+	<li>Providing a C API that enables C programs to interact with the interpreter</li>
+	<li>Providinsg a <i>foreign function interface</i> (FFI) that enables programs to call C library functions</li>
       </ul>
 
-      <p>CMake can build our code, but it can't change it (at least, not by itself)</p>
+      <i>Python does both</i>
 
     </section>
 
     <section class="slide">
-      <h2>Adaptable MPI interface</h2>
+      <h3>The Python C API</h3>
 
-      <div class="columns two">
-	<div>
-	  <ul>
-	    <li>Solution: Adaptable module to handle MPI import
-	      <ul>
-		<li>Preprocessor directives (set using CMake) determine which MPI interface is used</li>
-	      </ul>
-	  </ul>
-
-	</div>
-	<div>
-	  <pre class="code_box code_file">
-	  <code class="compact language-fortran" style="font-size:0.9em;">#include "mpi_types.h"
-
-module system_mpi
-#ifdef HAVE_MPI_F08_MODULE
-  use mpi_f08
-#elif HAVE_MPI_F90_MODULE
-  use mpi
-#else
-  include 'mpif.h'
-#endif
-end module system_mpi</code>
-	  </pre>
-	</div>
-      </div>
-
-      <div class="place bottom" style="padding-bottom:1.5em">
-	<a href="https://github.com/LightDA-assim/system_mpi">https://github.com/LightDA-assim/system_mpi</a>
-      </div>
-
+      With the C API you can
+      <ul>
+	<li>Create Python extension modules</li>
+	<li>Embed Python in an application</li>
+	<li>Documentation: <a href="https://docs.python.org/3/c-api/index.html">https://docs.python.org/3/c-api/index.html</a></li>
+	<li>Official tutorial: <a href="https://docs.python.org/3/c-api/index.htmlhttps://docs.python.org/3/extending/index.html">https://docs.python.org/3/c-api/index.htmlhttps://docs.python.org/3/extending/index.html</a></li>
+      </ul>
     </section>
 
     <section class="slide">
-      <h2>Adaptable MPI interface</h2>
+      <h2>C Extension module example</h2>
 
-      <pre class="code_box code_file" style="width:400px;">
-	<mark class="next"><code class="compact language-fortran">#include "mpi_types.h"
-use system_mpi</code></mark><span class="annotation_container"><span class="annotation right next" style="position:relative; top:-1em">Provides the best available of the three Fortran interfaces</span></span><code class="compact">
+      <b>square.c:</b>
+      <pre class="code_box" style="height:75%; overflow:scroll">
+	<code class="language-c compact">#define PY_SSIZE_T_CLEAN
+#include &lt;Python.h&gt;
 
-</code><mark class="next"><code class="compact language-fortran">MPI_COMM_TYPE::comm
-MPI_REQUEST_TYPE::request
-MPI_STATUS_TYPE::status</code></mark><span class="annotation_container"><span class="annotation right next" style="position:relative; top:-1em">Preprocessor directives are converted to the correct type at compile time</span></span><code class="compact language-fortran">
-integer::ierr
+static PyObject * square (PyObject *self, PyObject *args)
+{
+    double input;
+    int sts;
 
-call MPI_Init(ierr)
+    if (!PyArg_ParseTuple(args, "d", &input))
+        return NULL;
 
-comm=MPI_COMM_WORLD
+    double output = input*input;
 
-</code><mark class="next"><code class="compact language-fortran">call MPI_Ibcast( &
-   1,1,MPI_INTEGER,0,comm,request,ierr)</code></mark><span class="annotation_container"><span class="annotation right next" style="position:relative; top:-1em">MPI procedures are called as normal</span></span><code class="compact language-fortran">
+    return PyFloat_FromDouble(output);
+}
 
-call MPI_Wait(request,status,ierr)
+static PyMethodDef squareMethods[] = {
+    {"square",  square, METH_VARARGS,
+     "Square a number."},
+    {NULL, NULL, 0, NULL}        /* Sentinel */
+};
 
-call MPI_Finalize(ierr)</code>
+static struct PyModuleDef squareModule = {
+    PyModuleDef_HEAD_INIT,
+    "square",   /* name of module */
+    "Square numbers", /* module documentation, may be NULL */
+    -1,       /* size of per-interpreter state of the module,
+                 or -1 if the module keeps state in global variables. */
+    squareMethods
+};
+
+PyMODINIT_FUNC PyInit_square(void)
+{
+    return PyModule_Create(&squareModule);
+}</code>
       </pre>
 
-      <div class="place bottom" style="padding-bottom:1.5em">
-	<a href="https://github.com/LightDA-assim/system_mpi">https://github.com/LightDA-assim/system_mpi</a>
-      </div>
-
     </section>
 
     <section class="slide">
-      <h2>Testing with CTest</h2>
+      <h2>Compiling a C extension module</h2>
 
-      CMake provides its own testing infrastructure. All you need to do is
-      <ol>
-	<li>Write a program that returns a non-zero exit code on error (<code>error stop</code> in Fortran)</li>
-	<li>Add something like this to your CMakeLists.txt:
-      <pre class="code_box code_file">
-	<code class="compact language-cmake">enable_testing()
+      <b>setup.py:</b>
+      <pre class="code_box" style="max-height:80%; overflow:scroll">
+	<code class="language-python compact">from distutils.core import setup, Extension
 
-# Create a test (passes if test1_bin has an exit status of 0)
-add_executable(test1_bin test1.f90)
-add_test(test1 test1_bin)</code>
+square = Extension('square',
+                    sources = ['square.c'])
+
+setup (name = 'square',
+       version = '1.0',
+       description = 'This is a demo package',
+       ext_modules = [square])</code>
       </pre>
-      </li>
 
-	<li>Run all tests with <code>make test</code>
-      </ol>
+      <b>Build and install with:</b> <code class="language-bash">python setup.py install</code> or <code class="language-bash">pip install '.'</code>
 
     </section>
 
     <section class="slide">
-      <h2>Running tests automatically after build</h2>
+      <h2 style="margin-bottom:16px;">Building with other build systems</h2>
 
-      Better yet, put the following at the end of your CMakeLists.txt and CMake will run all tests whenever you build your project:
-      <pre class="code_box code_file">
-	<code class="compact language-cmake">add_custom_target(all_tests ALL
-  DEPENDS test1)
+      <b>CMakeLists.txt:</b>
+      <pre class="code_box" style="max-height:65%; overflow:scroll">
+	<code class="language-cmake compact">cmake_minimum_required(VERSION 3.9.5)
 
-# Run tests automatically after build
+project(square)
+
+find_package(Python 3.5 COMPONENTS Development REQUIRED)
+
+add_library(square MODULE square.c)
+
+set_target_properties(
+  square
+  PROPERTIES
+      PREFIX ""
+      OUTPUT_NAME "square"
+      LINKER_LANGUAGE C
+  )
+
+target_link_libraries(square Python::Module)
+
+enable_testing()
+add_test(test_square ${PYTHON_EXECUTABLE} -c
+  "from square import square; \
+   y=square(2.0); \
+   assert y==4.0")
+
+
+add_custom_target(run_tests ALL DEPENDS square)
 add_custom_command(
-     TARGET all_tests
-     COMMENT "Run tests"
+     TARGET run_tests
      POST_BUILD
      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-     COMMAND ${CMAKE_CTEST_COMMAND})</code>
+     COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -C $<CONFIGURATION>
+)</code>
+      </pre>
+
+      <b>Build and install with:</b> <code class="language-bash">mkdir build && cmake .. && make -j8</code>
+
+    </section>
+
+    <section class="slide">
+      <h2>Running extension modules</h2>
+
+      Compiled extension modules can be used just like any other Python module:
+      <pre class="code_box"><code class="language-python">import square
+y=square(2.0)</code>
       </pre>
 
     </section>
 
     <section class="slide">
-      <h2>Docker enables testing of many compilers</h2>
+      <h2>f2py: Generating extension modules from Fortran code</h2>
 
-      Set the compiler image with an ARG:
-      <pre class="code_box code_file">
-	<code class="language-dockerfile"><mark>ARG compiler_image=gcc:latest</mark>
-FROM <mark>$compiler_image</mark> AS build_base</code>
-      </pre>
-
-      Build an image with a particular compiler
-      <pre class="code_box cli">
-	<code class="language-bash">docker build -t lightda-examples-gcc:4.9.4 \
-  <mark>--build-arg compiler_image=gcc:4.9.4</mark> compiler-tests</code>
-      </pre>
-
-      Environment variables (e.g. FC, FFLAGS) can be set similarly
-
-    </section>
-
-    <section class="slide">
-      <h2>Summary</h2>
-
+      F2py does the following:
       <ul>
-	<li>Research based on portable software has a better shot at being reproducible.</li>
-	<li>Space physics software frequently outgrows the capabilities of plain Makefiles. Consider using a more capable system such as CMake.</li>
-	<li>Testing helps make your software reliable and portable, especially if you test regularly in multiple environments.</li>
-      </ul>
-
-      <div class="place bottom" style="width:80%; padding-bottom:2em;"><a href="https://github.com/LightDA-assim/lightda-core">https://github.com/LightDA-assim/lightda-core</a> &mdash; my current project (that uses all the tools and techniques described here)</div>
-    </section>
-
-    <section class="slide">
-      <h2>The non-scalable solution</h2>
-
-      <div class="columns two">
-	<div>
-	  Makefile:
-	  <pre class="code_box code_file">
-	    <mark class="next"><code class="language-makefile">include Makefile.linux.gfortran</code></mark>
-<code class="language-makefile">%.o: %.f90
-	$(FC) -c $&lt;
-hello: hello.o
-	$(FC) -o hello hello.o</code>
-	  </pre>
-	</div>
-	<div>
-	  Makefile.linux.gfortran
-	  <pre class="code_box code_file">
-	    <code class="language-makefile">FC=gfortran</code>
-	  </pre>
-	<ul>
-	  <li>Results in a proliferation of files named <code>Makefile.(os).(compiler)</code></li>
-	  <li>User must manually select the correct OS/compiler</li>
-	</ul>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
-      <h2>MPI interfaces</h2>
-
-      <ul>
-	<li>Legacy: <code>include 'mpif.h'</code>
-	  <ul>
-	    <li>Deprecated&mdash;might not be available in the future</li>
-	    <li>Produces lots of type mismatch warnings on modern compilers</li>
-	    <li>But: This is the only option in some cases</li>
-	  </ul>
-	</li>
+	<li>Scans Fortran source code for procedures to wrap</li>
+	<li>Generates wrapper code in C using the Python C API</li>
+	<li>Compiles and links the Fortran code and the C wrapper</li>
       </ul>
 
     </section>
 
     <section class="slide">
-      <h2>MPI interfaces</h2>
+      <h2>f2py: Generating extension modules from Fortran code</h2>
 
-      <ul>
-	<li>Fortran 90: <code>use mpi</code>
-	  <ul>
-	    <li>Call signatures are the same as legacy interface, but doesn't trigger all the compiler warnings</li>
-	  </ul>
-	</li>
-	<li>Fortran 2008: <code>use mpi_f08</code>
-	  <ul>
-	    <li>Modernized interface, some call signatures are different (mostly just different data types for some arguments) <nobr>e.g. <code>INTEGER COMM</code> &rarr; <code>TYPE(MPI_Comm) comm</code></nobr></li>
-	  </ul>
-	</li>
-    </ul>
-
-    </section>
-
-    <section class="slide">
-      <h2>Handling external dependencies</h2>
-
-      <div style="padding-top:40px;">
-      <p>What happens when you call <code class="language-cmake">find_package(&lt;PackageName&gt;)</code>?</p>
-
-      <div class="columns two" style="font-size:0.9em;">
-	<div>
-	  <ol>
-	    <li>Module mode:
-	      <ul>
-		<li>CMake looks for <code>Find&lt;PackageName&gt;.cmake</code></li>
-		<li>CMake provides these &ldquo;find modules&rdquo; for many common libraries, or you can provide your own</li>
-	      </ul>
-	    </li>
-	  </ol>
-	</div>
-	<div>
-	  <ol>
-	    <li value="2">Config mode:
-	      <ul>
-		<li>CMake searches for <code>&lt;PackageName&gt;Config.cmake&rdquo;</code></li>
-		<li>You can tell CMake where to look by setting <code>&lt;PackageName&gt;_DIR</code></li>
-	      </ul>
-	    </li>
-	  </ol>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
-      <h2>Handling external dependencies</h2>
-
-      Some projects package everything together (perhaps using git submodule), but this can cause problems
-      <ul>
-	<li>Conflicts if two libraries depend on the same third party library</li>
-	<li>Difficulty switching versions of external libraries</li>
-	<li>Needlessly large source and binary distributions</li>
-	<li>Difficulties when building binary packages</li>
-      </ul>
-
-    </section>
-
-    <section class="slide">
-      <h2>Breaking into components</h2>
-
-      CMake &ldquo;superbuild&rdquo; using ExternalProject:
-
-      <pre class="code_box code_file">
-	<code class="compact" style="font-size:0.6em">include(ExternalProject)
-
-ExternalProject_Add(
-  system_mpi
-  GIT_REPOSITORY https://github.com/LightDA-assim/system_mpi
-  GIT_TAG main
-  CMAKE_CACHE_ARGS
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR})
-
-ExternalProject_Add(
-  fortran_exceptions
-  GIT_REPOSITORY https://github.com/LightDA-assim/fortran_exceptions
-  GIT_TAG main
-  CMAKE_CACHE_ARGS
-        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR})
-
-ExternalProject_Add(lightda
-  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.."
-  CMAKE_CACHE_ARGS
-    -Dsystem_mpi_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/system_mpi
-    -Dfortran_exceptions_DIR:STRING=${CMAKE_CURRENT_BINARY_DIR}/lib/cmake/fortran_exceptions
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS system_mpi fortran_exceptions)</code>
-      </pre>
-
-    </section>
-
-    <section class="slide">
-      <h2>Polymorphic types</h2>
-
-      <div class="columns two">
-	<div>
-	  Base observation type:
-	  <pre class="code_box code_file">
-	    <code class="compact">module observations
-
+      <p><b>To wrap this (fortfuncs.f90):</b>
+      <pre class="code_box"><code class="language-fortran compact">module fortfuncs
   implicit none
+contains
+  subroutine square(x,y)
+    integer, intent(in) :: x
+    integer, intent(out) :: y
+    y = x*x
+  end subroutine square
+end module fortfuncs</code>
+      </pre></p>
 
-  type, abstract::observation_set
-  contains
-    procedure(get_size), deferred::get_size
-    procedure(get_values), deferred::get_values
-    procedure(get_values), deferred::get_errors
-  end type observation_set
-
-  abstract interface
-
-     ! Procedure signatures go here !
-
-  end interface
-
-end module observations</code>
-	  </pre>
-	</div>
-	<div>
-
-	  Derived type for vertical TEC:
-	  <pre class="code_box code_file">
-	    <code class="compact">module vtec_observations
-
-  use observations, ONLY: observation_set
-
-  implicit none
-
-  type, abstract, extends(observation_set):: &
-      vtec_observation_set
-  contains
-    procedure::get_size
-    procedure::get_values
-    procedure::get_errors
-  end type vtec_observation_set
-
-  abstract interface
-
-     ! Procedure implementations go here !
-
-  end interface
-
-end module vtec_observations</code>
-	  </pre>
-
-	</div>
-      </div>
-    </section>
-
-    <section class="slide">
-      <h2>Polymorphic types</h2>
-
-      Using vtec_observations type:
-      <pre class="code_box code_file">
-	<code class="compact">subroutine process_obs(obs_set)
-  use observations, ONLY: observation_set
-  use vtec_observations, ONLY: vtec_observation_set
-
-  class(observation_set)::obs_set
-  integer::size
-
-  size = obs_set%get_size()
-
-  ! Select type lets us act conditionally depending on
-  ! the type of a polymorphic variable
-  select type(obs_set)
-  class is (vtec_observation_set)
-
-    ! Do something specific with the TEC data
-
-  class default
-
-    ! Do something generic
-
-  end select
-
-end subroutine process_obs</code>
-      </pre>
-
-    </section>
-
-    <section class="slide">
-      <h2>Error handling: Integer error codes</h2>
-
-      <div class="columns two">
-
-	<div>
-	  Fortran:
-	  <pre class="code_box code_file">
-	    <code>call MPI_Init(ierr)</code>
-	  </pre>
-
-	  C:
-	  <pre class="code_box code_file">
-	    <code>int ierr=mkdir("build",0777)</code>
-	  </pre>
-	</div>
-	<div>
-	  <ul>
-	    <li>Pros
-	      <ul>
-		<li>Portable</li>
-		<li>Simple</li>
-	      </ul>
-	    </li>
-	    <li>Cons
-	      <ul>
-		<li>Caller must check code</li>
-		<li>Integer values can be misinterpreted</li>
-	      </ul>
-	    </li>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
-      <h2>Error handling: Exceptions</h2>
-
-      <div class="columns two">
-
-	<div>
-	  Python:
-	  <pre class="code_box code_file">
-	    <code class="compact" style="font-size:0.8em">try:
-    raise ValueError(
-        "An error occurred")
-except:
-    try_to_recover()</code>
-	  </pre>
-
-	  C++:
-	  <pre class="code_box code_file">
-	    <code class="compact" style="font-size:0.8em">try{
-  throw exception;
-catch() {
-  try_to_recover()
-}</code>
-	  </pre>
-	</div>
-	<div>
-	  <ul>
-	    <li>Pros
-	      <ul>
-		<li>Less ambiguity in meaning</li>
-		<li>Program stops on unhandled exception</li>
-	      </ul>
-	    </li>
-	    <li>Cons
-	      <ul>
-		<li>Less portable (e.g. only C++ code can catch C++ exceptions)</li>
-	      </ul>
-	    </li>
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
-      <h2>Exceptions in Fortran</h2>
-
-	  Use a polymorphic exception type:
-
-      <div class="columns two">
-	<div>
-
-	  <pre class="code_box code_file">
-	    <code class="compact" style="font-size:0.75em">subroutine analyze(status)
-
-  type(error_container), &
-    intent(out), optional::status
-
-  call get_data(status)
-
-  select type(error => status%info)
-  class is(io_error)
-
-    ! Handle the exception
-    error%handled = .true.
-
-  end select
-
-end subroutine analyze</code>
-	  </pre>
-
-	</div>
-	<div>
-
-	  <div style="font-size:0.75em">Poppe 2012 &ldquo;Error handling in Fortran 2003&rdquo; 10.1145/2338786.2338787</div>
-
-	  <div style="font-size:0.75em">
-	    <div><nobr><a href="https://github.com/koenpoppe/ErrorHandlingInFortran2003">https://github.com/koenpoppe/ErrorHandlingInFortran2003</a></nobr></div>
-
-	    <div><nobr><a href="https://github.com/LightDA-assim/fortran_exceptions">https://github.com/LightDA-assim/fortran_exceptions</a></nobr></div>
-	  </div>
-
-	</div>
-      </div>
-
-    </section>
-
-    <section class="slide">
-      <h2>Polymorphism limitations</h2>
-
-
-      <ul>
-	<li>Can't pass to/from C interoperable procedures
-	  <ul>
-	    <li>This prevents passing to other languages such as Python</li>
-	  </ul>
-	</li>
-	<li>Compilers can differ slightly in implementation of polymorphism
-	  <ul>
-	    <li>This can be mitigated with testing</li>
-	  </ul>
-	</li>
-      </ul>
+      <b>Run the command</b> <code class="language-bash">f2py -m fortfuncs -c fortfuncs.f90</code>
 
     </section>
 
