@@ -411,6 +411,44 @@ end module fortfuncs</code>
 
     </section>
 
+    <section class="slide">
+      <h2>CFFI: Call a shared library from python</h2>
+
+      Suppose you have already compiled the C function <code>square</code> to a shared library (libsquare.so, say). Then you can load the library and call the function using cffi module:
+
+      <pre class="code_box" style="height:55%; overflow:scroll"><code class="language-python compact">from cffi import FFI
+
+ffi=FFI()
+
+ffi.cdef("""
+double square(double);
+""")
+
+def get_sharedlib_extension():
+    import os
+    import sys
+
+    is_windows = os.name == "nt"
+    is_apple = sys.platform == "darwin"
+    if is_windows:
+        ext = ".dll"
+    elif is_apple:
+        ext = ".dylib"
+    else:
+        ext = ".so"
+
+    return ext
+
+ext=get_sharedlib_extension()
+lib=ffi.dlopen('./libsquare'+ext)
+
+# Wrapper for the C function 'square'
+def square(x):
+    return lib.square(x)
+      </code></pre>
+
+    </section>
+
     <div class="progress"></div>
 
     <script src="node_modules/@shower/core/dist/shower.js"></script>
