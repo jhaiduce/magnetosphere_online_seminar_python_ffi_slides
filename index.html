@@ -130,19 +130,20 @@
     </section>
 
     <section class="slide">
-      <h2>Scope of this talk</h2>
+      <h2>What I hope you'll learn from this talk</h2>
 
       <div class="columns two">
 	<div>
-	  <h3>Covered in this talk</h3>
+	  <h3>If you're a C/Fortran programmer</h3>
 	  <ul>
-	    <li>How to create Python interfaces for C and Fortran code</li>
+	    <li>Learn some options for wrapping your existing code with Python</li>
 	  </ul>
 	</div>
 	<div>
-	  <h3>Related topics not discussed here</h3>
+	  <h3>If you're new to compiled languages</h3>
 	  <ul>
-	    <li>How to write C and Fortran</li>
+	    <li>Get a basic picture of how Python interacts with other software</li>
+	    <li>See what undergirds popular libraries like Numpy</li>
 	  </ul>
 	</div>
       </div>
@@ -151,11 +152,12 @@
 
     <section class="slide">
 
-      <h2>Why not just write everything in Python?</h2>
+      <h2>Why wrap compiled code?</h2>
+      <i>(i.e., why not just write everything in Python?)</i>
 
       <div class="columns two">
 	<div>
-	  <h3>Increase performance</h3>
+	  <h3>Increased performance</h3>
 	  <ul>
 	    <li>Pure python code tends to be ~100x slower than compiled languages like C or Fortran</li>
 	    <li>Popular libraries like scipy and numpy achieve high performance partly by implementing things in C/Fortran</li>
@@ -173,6 +175,42 @@
 	</div>
       </div>
 
+    </section>
+
+    <section class="slide">
+      <h2>Interfacing methods covered in this talk</h2>
+
+      <table>
+	<tr>
+	  <td>Python C API</td>
+	  <td>Low level, most direct interaction with Python interpreter. Lots of boilerplate code.</td>
+	</tr>
+	<tr>
+	  <td>f2py</td>
+	  <td>Easy to use, generates wrappers for Fortran procedurs.</td>
+	</tr>
+	<tr>
+	  <td>FFI (Foreign function interface)</td>
+	  <td>Convenient for calling into a previously-compiled shared library</td>
+	</tr>
+      </table>
+    </section>
+
+    <section class="slide">
+      <h2>Other techniques</h2>
+      <table>
+	<tr>
+	  <td>SWIG</td>
+	  <td>Generates wrapper code for multiple interpreted languages (not just Python)</td>
+	</tr>
+	<tr>
+	  <td>Boost.Python</td>
+	  <td>Reduced boilerplate, C++-only</td>
+	<tr>
+	  <td>Subprocesses and file i/o</td>
+	  <td>Can be simpler to implement, but adds additional overhead</td>
+	</tr>
+      </table>
     </section>
 
     <section class="slide">
