@@ -450,6 +450,14 @@ end module fortfuncs</code>
     </section>
 
     <section class="slide">
+      <h2>f2py caveat</h2>
+
+      <ul>
+	<li>F2Py wrapper code makes no use of iso_c_binding. This probably means that f2py uses older techniques that predate iso_c_binding. These techniques involve making assumptions about how the compiler converts Fortran code to machine code, which are not guaranteed to be correct.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
       <h2>CFFI: Call a shared library from python</h2>
 
       Suppose you have already compiled the C function <code>square</code> to a shared library (libsquare.so, say). Then you can load the library and call the function using cffi module:
