@@ -495,6 +495,211 @@ def square(x):
 
     </section>
 
+    <section class="slide">
+      <h2>Passing arrays: Numpy C API</h2>
+
+      <div>Working with Numpy arrays requires using Numpy's C API in addition to the Python C API.</div>
+
+      <b>square.c:</b>
+      <pre class="code_box" style="height:55%; overflow:scroll">
+	<code class="language-c compact">#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include <numpy/arrayobject.h>
+#include <numpy/ndarraytypes.h>
+
+/* Square each element of an array and store the output
+   in another array of the same size */
+void square(double *input, double *output, int len)
+{
+  for(int i=0; i&lt;len; i++)
+    {
+      output[i] = input[i]*input[i];
+    }
+}
+
+/* Python wrapper for the square function */
+static PyObject *
+square_np (PyObject *self, PyObject *args)
+{
+  PyObject *input;
+  PyArrayObject *output = NULL;
+
+  /* Parse arguments */
+  if (!PyArg_ParseTuple(args, "O", &input))
+    return NULL;
+
+  /* Convert input to a contiguous numpy array of type double */
+  PyArrayObject * in_arr = (PyArrayObject *) PyArray_FROM_OTF
+    (input, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+
+  if (in_arr == NULL)
+    goto fail;
+
+  /* Get array size */
+  int ndim = PyArray_NDIM(in_arr);
+  npy_intp * shape = PyArray_DIMS(in_arr);
+  int len = (int) PyArray_SIZE(in_arr);
+
+  /* Create output array */
+  output = PyArray_SimpleNew(ndim, shape, NPY_DOUBLE);
+
+  /* Get pointers to input and output data */
+  double * in_data = (double *) PyArray_DATA(in_arr);
+  double * out_data = (double *) PyArray_DATA(output);
+
+  /* Square all elements */
+  square(in_data, out_data, size);
+
+  /* Decrement reference count of in_arr since it won't be returned */
+  Py_DECREF(in_arr);
+
+  return output;
+
+ fail:
+  /* Decrement reference counts and return NULL */
+  Py_XDECREF(in_arr);
+  Py_XDECREF(output);
+  return NULL;
+}
+
+static PyMethodDef squareMethods[] = {
+  {"square",  square_np, METH_VARARGS,
+   "Square each element of an array."},
+  {NULL, NULL, 0, NULL}        /* Sentinel */
+};
+
+static struct PyModuleDef squareModule = {
+  PyModuleDef_HEAD_INIT,
+  "square",   /* name of module */
+  "Square elements of arrays", /* module documentation, may be NULL */
+  -1,       /* size of per-interpreter state of the module,
+	       or -1 if the module keeps state in global variables. */
+  squareMethods
+};
+
+PyMODINIT_FUNC
+PyInit_square(void)
+{
+  import_array();
+  return PyModule_Create(&squareModule);
+}</code></pre>
+
+    </section>
+
+    <section class="slide">
+      <h2>Passing arrays: f2py</h2>
+
+      <pre class="code_box"><code class="language-fortran compact">module fortfuncs
+
+  implicit none
+
+contains
+
+  subroutine square(x,y,n)
+
+    real, intent(in) :: x(n)
+
+    real, intent(out) :: y(n)
+
+    integer, intent(in) :: n
+
+    y = x * x
+
+  end subroutine square
+
+end module fortfuncs</code>
+      </pre>
+
+      <b>Run the command</b> <code class="language-bash">f2py -m fortfuncs -c fortfuncs.f90</code> (same as previous example)
+
+    </section>
+
+    <section class="slide">
+      <h2>Passing arrays: cffi</h2>
+
+      Use numpy.ndarray.ctypes.data to get an array's data pointer, then ffi.cast to convert it to a C pointer that can be passed to the C function.
+
+      <pre class="code_box" style="height:55%; overflow:scroll"><code class="language-python compact">from cffi import FFI
+
+ffi=FFI()
+
+ffi.cdef("""
+double square(double*, double*, int);
+""")
+
+def get_sharedlib_extension():
+    import os
+    import sys
+
+    is_windows = os.name == "nt"
+    is_apple = sys.platform == "darwin"
+    if is_windows:
+        ext = ".dll"
+    elif is_apple:
+        ext = ".dylib"
+    else:
+        ext = ".so"
+
+    return ext
+
+ext=get_sharedlib_extension()
+lib=ffi.dlopen('./libsquare'+ext)
+
+# Wrapper for the C function 'square'
+def square(x):
+
+    import numpy as np
+
+    input_arr = np.ascontiguousarray(x,dtype=np.double)
+    output_arr = np.ascontiguousarray(np.empty(input_arr.shape),dtype=np.double)
+
+    input_ptr = ffi.cast('double*',input_arr.ctypes.data)
+    output_ptr = ffi.cast('double*',output_arr.ctypes.data)
+
+    lib.square(input_ptr,output_ptr,input_arr.size)
+
+    return output_arr
+
+if __name__=='__main__':
+
+    print(square([2,3,4]))</code></pre>
+
+    </section>
+
+    <section class="slide" id="learnmore">
+      <h2>Where to learn more</h2>
+
+      <dl>
+	<dt>Python/Numpy C API</dt>
+	<dd>
+	  <ul>
+	    <li>https://docs.python.org/3/extending/index.html</li>
+	    <li>https://docs.python.org/3/c-api/index.html</li>
+	    <li>https://numpy.org/devdocs/user/c-info.html</li>
+	    <li>https://scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html</li>
+	  </ul>
+	</dd>
+	<dt>f2py</dt>
+	<dd>
+	  <ul>
+	    <li>https://numpy.org/devdocs/f2py/index.html</li>
+	  </ul>
+	</dd>
+	<dt>CFFI</dt>
+	<dd>
+	  <ul>
+	    <li>https://cffi.readthedocs.io/en/latest/</li>
+	  </ul>
+	</dd>
+      </dl>
+
+      <style>
+	#learnmore li { line-height:1.6}
+	#learnmore ul { margin-bottom:12px}
+      </style>
+
+    </section>
+
     <div class="progress"></div>
 
     <script src="node_modules/@shower/core/dist/shower.js"></script>
