@@ -463,6 +463,16 @@ end module fortfuncs</code>
     <section class="slide">
       <h2>CFFI: Call a shared library from python</h2>
 
+      <ul>
+	<li>CFFI is based on libffi (<a href="https://sourceware.org/libffi/">https://sourceware.org/libffi/</a>), a foreign function interface (FFI) library</li>
+	<li>With CFFI you can load a shared library and call functions stored inside it.</li>
+	<li>CFFI documentation can be found at <a href="https://cffi.readthedocs.io/en/latest/">https://cffi.readthedocs.io/en/latest/</a></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>CFFI: Call a shared library from python</h2>
+
       Suppose you have already compiled the C function <code>square</code> to a shared library (libsquare.so, say). Then you can load the library and call the function using cffi module:
 
       <pre class="code_box" style="height:55%; overflow:scroll"><code class="language-python compact">from cffi import FFI
@@ -496,6 +506,17 @@ def square(x):
     return lib.square(x)
       </code></pre>
 
+    </section>
+
+    <section class="slide">
+      <h2>Passing arrays: Numpy C API</h2>
+
+      Numpy provides its own C API that adds support for Numpy data types on top of Python's own API.
+
+      <ul>
+	<li><a href="https://numpy.org/devdocs/user/c-info.html">https://numpy.org/devdocs/user/c-info.html</a> &mdash; Numpy C API documentation</li>
+	<li><a href="https://scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html">https://scipy-lectures.org/advanced/interfacing_with_c/interfacing_with_c.html</a> &mdash; Tutorial on the Numpy C API</li>
+      </ul>
     </section>
 
     <section class="slide">
