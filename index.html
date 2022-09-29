@@ -178,6 +178,47 @@
     </section>
 
     <section class="slide">
+      
+	  <h2>Space physics use cases</h2>
+	  <ul>
+	    <li>You wrote something in Python and it's too slow
+        <ul>
+          <li>After trying everything else, you re-write the slowest parts in C, C++, or Fortran</li>
+        </ul>
+      </li>
+	    <li>You have an existing code written in C/C++/Fortran and you want to use some Python package/feature with it
+        <ul>
+          <li>e.g. you want to make plots with Matplotlib, use numpy for pre/post processing, or take advantage of machine learning packages</li>
+        </ul>
+      </li>
+	    <li>You have a Python code and you found some useful C/C++/Fortran code that you want to use with it
+        <ul>
+          <li>So you wrap the C/C++/Fortran code and call it from Python</li>
+        </ul>
+      </li>
+	  </ul>
+
+    </section>
+
+    <section class="slide">
+      
+      <h2>Space physics use cases</h2>
+      <ul>
+	<li>Tsyganenko models and Geopack
+          <ul>
+            <li>At least two groups have created Python wrappers for these</li>
+          </ul>
+	</li>
+	<li>SpacePy
+          <ul>
+	    <li>Uses f2py to wrap IRBEM (International Radiation Belt Environment Modeling) library</li>
+	  </ul>
+	</li>
+      </ul>
+
+    </section>
+
+    <section class="slide">
       <h2>Interfacing methods covered in this talk</h2>
 
       <table>
@@ -293,6 +334,28 @@ end function</code>
     </section>
 
     <section class="slide">
+      <h2>Examples</h2>
+
+      <p>All example code is at <a href="https://github.com/jhaiduce/python_ffi_code_examples">https://github.com/jhaiduce/python_ffi_code_examples</a><p>
+
+      <p><b>To build and run the examples you'll need:</b>
+
+	<ul>
+	  <li>Python</li>
+	  <li>Numpy</li>
+	  <li>C and Fortran compilers (preferably gcc and gfortran)
+	    <ul>
+	      <li>On Linux and MacOS you can use your package manager (apt, dnf, brew, etc.); on Windows these are reportedly available via conda</li>
+	    </ul>
+	  </li>
+	  <li>CMake is needed for the CFFI examples</li>
+	</ul>
+
+      </p>
+
+    </section>
+
+    <section class="slide">
       <h3>The Python C API</h3>
 
       With the C API you can
@@ -300,7 +363,7 @@ end function</code>
 	<li>Create Python extension modules</li>
 	<li>Embed Python in an application</li>
 	<li>Documentation: <a href="https://docs.python.org/3/c-api/index.html">https://docs.python.org/3/c-api/index.html</a></li>
-	<li>Official tutorial: <a href="https://docs.python.org/3/c-api/index.htmlhttps://docs.python.org/3/extending/index.html">https://docs.python.org/3/c-api/index.htmlhttps://docs.python.org/3/extending/index.html</a></li>
+	<li>Official tutorial: <a href="https://docs.python.org/3/c-api/index.html">https://docs.python.org/3/c-api/index.html</a></li>
       </ul>
     </section>
 
@@ -422,94 +485,7 @@ y=square(2.0)</code>
     </section>
 
     <section class="slide">
-      <h2>f2py: Generating extension modules for Fortran code</h2>
-
-      F2py (<a href="https://numpy.org/doc/stable/f2py/">https://numpy.org/doc/stable/f2py/</a>) also uses the Python C API but it automates most of the process:
-      <ul>
-	<li>It scans Fortran source code for procedures to wrap</li>
-	<li>It generates wrapper code in C using the Python C API</li>
-	<li>It compiles and links the Fortran code and the C wrapper</li>
-      </ul>
-
-    </section>
-
-    <section class="slide">
-      <h2>f2py: Generating extension modules from Fortran code</h2>
-
-      <p><b>To wrap this (fortfuncs.f90):</b>
-      <pre class="code_box"><code class="language-fortran compact">module fortfuncs
-  implicit none
-contains
-  subroutine square(x,y)
-    integer, intent(in) :: x
-    integer, intent(out) :: y
-    y = x*x
-  end subroutine square
-end module fortfuncs</code>
-      </pre></p>
-
-      <b>Run the command</b> <code class="language-bash">f2py -m fortfuncs -c fortfuncs.f90</code>
-
-    </section>
-
-    <section class="slide">
-      <h2>f2py caveat</h2>
-
-      <ul>
-	<li>F2Py wrapper code makes no use of iso_c_binding. This probably means that f2py uses older techniques that predate iso_c_binding. These techniques involve making assumptions about how the compiler converts Fortran code to machine code, which are not guaranteed to be correct.</li>
-      </ul>
-    </section>
-
-    <section class="slide">
-      <h2>CFFI: Call a shared library from python</h2>
-
-      <ul>
-	<li>CFFI is based on libffi (<a href="https://sourceware.org/libffi/">https://sourceware.org/libffi/</a>), a foreign function interface (FFI) library</li>
-	<li>With CFFI you can load a shared library and call functions stored inside it.</li>
-	<li>CFFI documentation can be found at <a href="https://cffi.readthedocs.io/en/latest/">https://cffi.readthedocs.io/en/latest/</a></li>
-      </ul>
-    </section>
-
-    <section class="slide">
-      <h2>CFFI: Call a shared library from python</h2>
-
-      Suppose you have already compiled the C function <code>square</code> to a shared library (libsquare.so, say). Then you can load the library and call the function using cffi module:
-
-      <pre class="code_box" style="height:55%; overflow:scroll"><code class="language-python compact">from cffi import FFI
-
-ffi=FFI()
-
-ffi.cdef("""
-double square(double);
-""")
-
-def get_sharedlib_extension():
-    import os
-    import sys
-
-    is_windows = os.name == "nt"
-    is_apple = sys.platform == "darwin"
-    if is_windows:
-        ext = ".dll"
-    elif is_apple:
-        ext = ".dylib"
-    else:
-        ext = ".so"
-
-    return ext
-
-ext=get_sharedlib_extension()
-lib=ffi.dlopen('./libsquare'+ext)
-
-# Wrapper for the C function 'square'
-def square(x):
-    return lib.square(x)
-      </code></pre>
-
-    </section>
-
-    <section class="slide">
-      <h2>Passing arrays: Numpy C API</h2>
+      <h2>Passing arrays with the Numpy C API</h2>
 
       Numpy provides its own C API that adds support for Numpy data types on top of Python's own API.
 
@@ -520,7 +496,7 @@ def square(x):
     </section>
 
     <section class="slide">
-      <h2>Passing arrays: Numpy C API</h2>
+      <h2>Passing arrays with the Numpy C API</h2>
 
       <div>Working with Numpy arrays requires using Numpy's C API in addition to the Python C API.</div>
 
@@ -611,7 +587,38 @@ PyInit_square(void)
     </section>
 
     <section class="slide">
-      <h2>Passing arrays: f2py</h2>
+      <h2>f2py: Generating extension modules for Fortran code</h2>
+
+      F2py (<a href="https://numpy.org/doc/stable/f2py/">https://numpy.org/doc/stable/f2py/</a>) also uses the Python C API but it automates most of the process:
+      <ul>
+	<li>It scans Fortran source code for procedures to wrap</li>
+	<li>It generates wrapper code in C using the Python C API</li>
+	<li>It compiles and links the Fortran code and the C wrapper</li>
+      </ul>
+
+    </section>
+
+    <section class="slide">
+      <h2>f2py: Generating extension modules from Fortran code</h2>
+
+      <p><b>To wrap this (fortfuncs.f90):</b>
+      <pre class="code_box"><code class="language-fortran compact">module fortfuncs
+  implicit none
+contains
+  subroutine square(x,y)
+    integer, intent(in) :: x
+    integer, intent(out) :: y
+    y = x*x
+  end subroutine square
+end module fortfuncs</code>
+      </pre></p>
+
+      <b>Run the command</b> <code class="language-bash">f2py -m fortfuncs -c fortfuncs.f90</code>
+
+    </section>
+
+    <section class="slide">
+      <h2>Passing arrays with f2py</h2>
 
       <pre class="code_box"><code class="language-fortran compact">module fortfuncs
 
@@ -639,7 +646,63 @@ end module fortfuncs</code>
     </section>
 
     <section class="slide">
-      <h2>Passing arrays: cffi</h2>
+      <h2>f2py caveat</h2>
+
+      <ul>
+	<li>F2Py wrapper code makes no use of iso_c_binding. This probably means that f2py uses older techniques that predate iso_c_binding. These techniques involve making assumptions about how the compiler converts Fortran code to machine code, which are not guaranteed to be correct.</li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>CFFI: Call a shared library from python</h2>
+
+      <ul>
+	<li>CFFI is based on libffi (<a href="https://sourceware.org/libffi/">https://sourceware.org/libffi/</a>), a foreign function interface (FFI) library</li>
+	<li>With CFFI you can load a shared library and call functions stored inside it.</li>
+	<li>CFFI documentation can be found at <a href="https://cffi.readthedocs.io/en/latest/">https://cffi.readthedocs.io/en/latest/</a></li>
+      </ul>
+    </section>
+
+    <section class="slide">
+      <h2>CFFI: Call a shared library from python</h2>
+
+      Suppose you have already compiled the C function <code>square</code> to a shared library (libsquare.so, say). Then you can load the library and call the function using cffi module:
+
+      <pre class="code_box" style="height:55%; overflow:scroll"><code class="language-python compact">from cffi import FFI
+
+ffi=FFI()
+
+ffi.cdef("""
+double square(double);
+""")
+
+def get_sharedlib_extension():
+    import os
+    import sys
+
+    is_windows = os.name == "nt"
+    is_apple = sys.platform == "darwin"
+    if is_windows:
+        ext = ".dll"
+    elif is_apple:
+        ext = ".dylib"
+    else:
+        ext = ".so"
+
+    return ext
+
+ext=get_sharedlib_extension()
+lib=ffi.dlopen('./libsquare'+ext)
+
+# Wrapper for the C function 'square'
+def square(x):
+    return lib.square(x)
+      </code></pre>
+
+    </section>
+
+    <section class="slide">
+      <h2>Passing arrays with cffi</h2>
 
       Use numpy.ndarray.ctypes.data to get an array's data pointer, then ffi.cast to convert it to a C pointer that can be passed to the C function.
 
@@ -693,7 +756,7 @@ if __name__=='__main__':
     <section class="slide" id="learnmore">
       <h2>Where to learn more</h2>
 
-      <dl>
+      <dl style="position:relative; top:-20px">
 	<dt>Python/Numpy C API</dt>
 	<dd>
 	  <ul>
@@ -715,6 +778,8 @@ if __name__=='__main__':
 	    <li>https://cffi.readthedocs.io/en/latest/</li>
 	  </ul>
 	</dd>
+	<dt>Example code from this talk: https://github.com/jhaiduce/python_ffi_code_examples
+	</dt>
       </dl>
 
       <style>
